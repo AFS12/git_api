@@ -17,7 +17,7 @@
           <v-text-field
             label="Github User"
             placeholder="Placeholder"
-            v-model="user"
+            v-model="userFind"
           ></v-text-field>
           <v-btn color="accent" elevation="4" outlined @click="getApi"
             >Search</v-btn
@@ -33,15 +33,31 @@
         <v-col md="8">
           <v-card elevation="4" v-show="showAvatar">
             <v-card-title>
-              <v-avatar>
-                <img :src="avatar" />
+              <v-avatar @click="userLink(user.html_url)">
+                <img :src="user.avatar_url" />
               </v-avatar>
-              <h2>&nbsp; {{ name }}</h2>
+              <h2 @click="userLink(user.html_url)">&nbsp; {{ user.name }}</h2>
             </v-card-title>
+            <v-card-subtitle>
+              <p class="">{{ user.bio }}</p>
+            </v-card-subtitle>
             <v-card-text>
-              <p class="">{{ bio }}</p>
-              <p>{{ blog }}</p>
-              <br>
+              <p>
+                <v-btn small text :href="user.followers_url" target="_blank"
+                  >Followers: {{ user.followers }}
+                </v-btn>
+
+                <v-btn small text :href="user.following_url" target="_blank"
+                  >Following: {{ user.following }}
+                </v-btn>
+                
+              </p>
+              <p>
+                <v-btn small text :href="user.blog" target="_blank">
+                  {{ user.blog }}
+                </v-btn>
+              </p>
+              <br />
               <h1>Repositories:</h1>
             </v-card-text>
             <v-row v-for="(repo, index) in repos" :key="index">
@@ -78,29 +94,27 @@ export default {
   name: "App",
 
   data: () => ({
+    userFind: "",
     user: "",
-    avatar: "",
     showAvatar: false,
-    name: "",
-    bio: "",
-    blog: "",
     repos: ""
   }),
 
   methods: {
     test: function() {
-      console.log(this.user);
+      console.log(this.userFind);
+    },
+
+    userLink: function(url) {
+      window.open(url, "blank_");
     },
 
     getApi: function() {
-      axios.get(this.getUrl() + this.user).then(response => {
+      axios.get(this.getUrl() + this.userFind).then(response => {
         console.log(response.data);
-        this.avatar = response.data.avatar_url;
-        this.name = response.data.name;
+        this.user = response.data;
         this.showAvatar = true;
-        this.bio = response.data.bio;
-        this.blog = response.data.blog;
-        axios.get(this.getUrl() + this.user + "/repos").then(repos => {
+        axios.get(this.getUrl() + this.userFind + "/repos").then(repos => {
           console.log(repos.data[6]);
           this.repos = repos.data;
         });
